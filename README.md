@@ -1,6 +1,7 @@
 # AJStorybook
 The Storybook of AllJoint
 傲嬌前端範例集
+[Link](https://alljointtw.github.io/AJStorybook/storybook-static/)
 
 ## Getting Started
 準備開始
