@@ -6,6 +6,7 @@ import { linkTo } from '@storybook/addon-links'
 
 import MyButton from './MyButton.vue'
 import Welcome from './Welcome.vue'
+import BlocklyComponent from './BlocklyComponent.vue'
 
 storiesOf('Welcome', module).add('to Storybook', () => ({
   components: { Welcome },
@@ -31,5 +32,11 @@ storiesOf('Button', module)
     template: '<my-button @click="action">😀 😎 👍 💯</my-button>',
     methods: { action: action('clicked') }
   }))
+
+storiesOf('Blockly Component', module).add('Demo', () => ({
+  components: { BlocklyComponent },
+  template: '<blockly-component></blockly-component>',
+  methods: { action: action('clicked') }
+}))
 
 /* eslint-enable react/react-in-jsx-scope */

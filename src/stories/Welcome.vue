@@ -68,7 +68,6 @@ const log = () => console.log('Welcome to storybook!')
 
 export default {
   name: 'welcome',
-
   props: {
     showApp: {
       type: Function,
