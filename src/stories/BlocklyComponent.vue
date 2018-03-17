@@ -5,9 +5,11 @@
         <el-row>
           <el-col :span="6">
             <h5>Toolbox</h5>
-            <el-menu style="height: 100%;">
+            <el-menu>
               <draggable v-model="toolbox" :options="{ group: { name: 'BlocklyComponent', pull: 'clone', put: false }, animation: 100, sort: false }">
-                <el-menu-item v-for="(element, index) in toolbox" :key="element.index" :index="index" v-html="element.html" style="width: 100%;"></el-menu-item>
+                <el-menu-item v-for="element in toolbox" :key="element.index" :index="element.id">
+                  <component :is="element"></component>
+                </el-menu-item>
               </draggable>
             </el-menu>
           </el-col>
@@ -19,7 +21,7 @@
               <el-main>
                 <el-card class="box-card">
                   <draggable v-model="content" :options="{ group: 'BlocklyComponent', animation: 100 }">
-                    <div v-for="element in content" :key="element" v-html="element.html"></div>
+                    <component v-for="element in content" :key="element.index" :is="element" contenteditable="false"></component>
                   </draggable>
                 </el-card>
               </el-main>
@@ -28,28 +30,6 @@
         </el-row>
       </el-main>
     </el-container>
-    <!-- <div class="editor">
-      <h1>Editor</h1>
-      <draggable v-model="content" :options="{ group: 'BlocklyComponent', animation: 150 }">
-        <div v-for="element in content" :key="element">
-          <div v-html="element.html"></div>
-        </div>
-      </draggable>
-    </div>
-    <div class="toolbox">
-      <h1>Toolbox</h1>
-      <draggable v-model="toolbox" :options="{ group: { name: 'BlocklyComponent', pull: 'clone', put: false }, animation: 150, sort: false }">
-        <div v-for="element in toolbox" :key="element">
-          <div v-html="element.html"></div>
-        </div>
-      </draggable>
-    </div>
-    <div class="preview">
-      <h1>Preview</h1>
-      <div v-for="element in content" :key="element">
-        <div v-html="element.html"></div>
-      </div>
-    </div> -->
   </div>
 </template>
 
@@ -67,32 +47,41 @@ export default {
     Element,
     draggable
   },
-  data: () => ({
-    a: true,
-    content: [{
-      name: 'Title H1',
-      html: '<h1>Title H1</h1>'
-    }],
-    toolbox: [{
-      name: 'Title H1',
-      html: '<h1>Title H1</h1>'
-    }, {
-      name: 'Title H2',
-      html: '<h2>Title H2</h2>'
-    }, {
-      name: 'Paragraph',
-      html: '<p>Paragraph</p>'
-    }, {
-      name: 'Button',
-      html: '<el-button type="primary" class="button">主要按钮</el-button>'
-    }, {
-      name: 'Text',
-      html: '<textarea rows="2" cols="10"></textarea>'
-    }, {
-      name: 'Icon Edit',
-      html: '<i class="el-icon-edit">asdf</i>'
-    }]
-  })
+  data: function () {
+    return {
+      content: [{
+        template: '<h1>H1 Title</h1>',
+        style: 'h1 { font-size: 100px; }'
+      }],
+      toolbox: [{
+        id: '1',
+        template: '<h1>H1 Title</h1>'
+      }, {
+        id: '2',
+        template: '<h2>H2 Title</h2>'
+      }, {
+        id: '3',
+        template: '<h3 style="font-size: 100px;">{{ title }}</h3>',
+        data: function () {
+          return {
+            title: 'H3 Title'
+          }
+        }
+      }, {
+        id: '4',
+        template: '<el-button type="primary" class="button">修改</el-button>'
+      }, {
+        id: '5',
+        template: '<p>Random: {{ Math.round((Math.random() * 100)) }}</p>'
+      }]
+    }
+  },
+  created: function () {
+    this.toolbox.push({
+      id: '6',
+      template: '<el-input type="text"></el-input>'
+    })
+  },
 }
 </script>
 
