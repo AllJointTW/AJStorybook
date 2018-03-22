@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "storybook": "start-storybook -p 6006",
-    "prettier": "npm run clean && prettier src/**/*.js src/**/*.vue .storybook/**/*.js package.json README.md .babelrc --write --single-quote --no-semi && standard --fix --plugin html '**/*.{js,vue}' --plugin markdown '**/*.md'",
+    "prettier":
+      "npm run clean && prettier src/**/*.js src/**/*.vue .storybook/**/*.js package.json README.md .babelrc --write --single-quote --no-semi && standard --fix --plugin html '**/*.{js,vue}' --plugin markdown '**/*.md'",
     "build-storybook": "build-storybook",
     "clean": "rimraf storybook-static"
   },
@@ -14,10 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/AllJointTW/AJStorybook.git"
   },
-  "keywords": [
-    "alljoint",
-    "storybook"
-  ],
+  "keywords": ["alljoint", "storybook"],
   "author": "TZU-YEN, CHANG (try_love_tom@alljoint.tw)",
   "license": "MIT",
   "bugs": {

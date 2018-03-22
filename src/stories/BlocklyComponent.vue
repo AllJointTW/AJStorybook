@@ -43,8 +43,8 @@
       <b-modal :id="'remove-notify' + '-' + index" hide-header v-for="(component, index) in content" :key="component.index" @ok="remove(index)"><h4>Are you sure you want to delete this Component?</h4></b-modal>
       
       <!-- Sidebar -->
-      <div id="mySidenav" class="sidenav">
-        <a class="toolbox-toggle" v-on:click="openNav()">
+      <div id="mySidenav" class="sidenav" :class="{ 'sidenav-show': isSidebarShow }">
+        <a class="toolbox-toggle" v-on:click="toggleNav()">
           <i class="fas fa-wrench"></i>
         </a>
         <div class="toolbox">
@@ -64,13 +64,13 @@
 import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
 import Draggable from 'vuedraggable'
-import Quill from 'quill'
+// import Quill from 'quill'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-vue/dist/bootstrap-vue.min.css'
-import 'quill/dist/quill.bubble.css'
+// import 'quill/dist/quill.bubble.css'
 
-import data from './data'
+import myComponents from './components'
 
 Vue.use(BootstrapVue)
 
@@ -83,18 +83,19 @@ export default {
     return {
       isCard: 'true',
       isEmpty: true,
-      toolbox: JSON.parse(JSON.stringify(data)),
+      isSidebarShow: false,
+      toolbox: JSON.parse(JSON.stringify(myComponents)),
       toolboxIsOpen: false,
-      content: JSON.parse(JSON.stringify(data))
+      content: JSON.parse(JSON.stringify(myComponents))
     }
   },
   watch: {
     content: function (value) {
-      this.isEmpty = (value.length === 0)
+      this.isEmpty = value.length === 0
     }
   },
   mounted: function () {
-    this.isEmpty = (this.content.length === 0)
+    this.isEmpty = this.content.length === 0
     // const ColorClass = Quill.import('attributors/class/color')
     // const SizeStyle = Quill.import('attributors/style/size')
 
@@ -118,16 +119,17 @@ export default {
     deepClone: function (original) {
       return JSON.parse(JSON.stringify(original))
     },
-    openNav: function () {
-      const width = document.getElementById("mySidenav").style.width
-
-      if (width == '250px') {
-        this.toolboxIsOpen = false
-        document.getElementById("mySidenav").style.width = "0px";
-      } else {
-        this.toolboxIsOpen = true
-        document.getElementById("mySidenav").style.width = "250px";
-      }
+    toggleNav: function () {
+      this.isSidebarShow = !this.isSidebarShow
+      // const right = document.getElementById("mySidenav").style.right
+      // console.log(right)
+      // if (right == '-250px') {
+      //   this.toolboxIsOpen = false
+      //   document.getElementById("mySidenav").style.width = "0px";
+      // } else {
+      //   this.toolboxIsOpen = true
+      //   document.getElementById("mySidenav").style.width = "-250px";
+      // }
     }
   }
 }
@@ -182,7 +184,7 @@ export default {
   line-height: 120px;
 }
 .draggable-area:empty:before {
-  content: "Drop Here";
+  content: 'Drop Here';
 }
 /* .drop-here {
   height: 120px;
@@ -262,22 +264,24 @@ export default {
   border-collapse: collapse;
   font-family: Menlo, Monaco, Consolas, courier new, monospace;
 }
-
-
-
-
-
+.html-code:focus {
+  outline: none !important;
+}
 
 .sidenav {
   height: 100%;
-  width: 0px;
+  width: 250px;
   position: fixed;
   z-index: 1;
-  top: 0;
-  right: 0;
+  top: 0px;
+  right: -250px;
   background-color: lightgrey;
   transition: 0.2s;
   padding-top: 60px;
+}
+
+.sidenav-show {
+  right: 0px;
 }
 
 .sidenav a {
@@ -323,14 +327,15 @@ export default {
 .thumbnail {
   width: 100%;
   -webkit-filter: blur(2px);
-	filter: blur(2px);
-	-webkit-transition: .2s ease-in-out;
-	transition: .2s ease-in-out;
+  filter: blur(2px);
+  -webkit-transition: 0.2s ease-in-out;
+  transition: 0.2s ease-in-out;
 }
 
 .thumbnail:hover {
   -webkit-filter: blur(0);
-	filter: blur(0);
+  filter: blur(0);
+  cursor: pointer;
 }
 
 .toolbox {
