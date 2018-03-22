@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "storybook": "start-storybook -p 6006",
-    "prettier": "prettier src/**/*.js src/**/*.vue .storybook/**/*.js package.json README.md .babelrc --write --single-quote --no-semi && standard --fix --plugin html '**/*.{js,vue}' --plugin markdown '**/*.md'",
+    "prettier": "npm run clean && prettier src/**/*.js src/**/*.vue .storybook/**/*.js package.json README.md .babelrc --write --single-quote --no-semi && standard --fix --plugin html '**/*.{js,vue}' --plugin markdown '**/*.md'",
     "build-storybook": "build-storybook",
     "clean": "rimraf storybook-static"
   },
@@ -40,7 +40,8 @@
     "vue-template-compiler": "^2.5.15"
   },
   "dependencies": {
-    "element-ui": "^2.2.1",
+    "bootstrap-vue": "^2.0.0-rc.2",
+    "quill": "^1.3.6",
     "vue": "^2.5.15",
     "vuedraggable": "^2.16.0"
   }
