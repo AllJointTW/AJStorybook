@@ -14,7 +14,7 @@
       <div :class="{ card: isCard == 'true', 'not-card': isCard == 'false' }">
         <draggable class="draggable-area" v-model="content" :options="{ group: { name: 'content', put: ['content', 'toolbox'] }, handle: '.drag-handle', ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' }">
           <div class="component" v-for="(component, index) in content" :key="component.index">
-            <section class="component row edit" :data-id="index" v-html="component.html"></section>
+            <section class="component row edit" :class="{ selected: selected == index }" :data-id="index" v-html="component.html"></section>
             <div v-if="selected == index" class="blockly-component-toolbar btn-group-vertical" role="group">
               <div class="btn toolbar-handle drag-handle blockly-component-tool">
                 <i class="fas fa-hand-point-up"></i>
@@ -81,7 +81,7 @@ export default {
   },
   data: function() {
     return {
-      editor: {},
+      editor: undefined,
       isCard: 'true',
       isEmpty: true,
       isSidebarShow: false,
@@ -115,6 +115,10 @@ export default {
       this.$nextTick(() => {
         const elements = document.querySelectorAll('.edit')
 
+        if (this.editor) {
+          this.editor.addElements(elements)
+          return
+        }
         this.editor = new MediumEditor(elements, {
           placeholder: false,
           toolbar: {
@@ -246,8 +250,18 @@ export default {
   position: relative;
   margin-bottom: 35px;
 }
+section.component.selected:before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  bottom: -15px;
+  left: -15px;
+  border: 1px solid black;
+  border-radius: 3px;
+}
 section.component:focus {
-  outline: 1px solid black;
+  outline: none;
 }
 .hide {
   display: none;
