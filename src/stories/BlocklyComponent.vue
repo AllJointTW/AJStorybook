@@ -12,21 +12,20 @@
     </nav>
     <div class="blockly-component">
       <div :class="{ card: isCard == 'true', 'not-card': isCard == 'false' }">
-        <!-- <div class="drop-here" v-if="isEmpty"><h1>Drop Here</h1></div> -->
-        <draggable class="draggable-area" v-model="content" :options="{ group: { name: 'content', put: ['content', 'toolbox'] }, handle: '.drag-handle', animation: 150, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' }" :clone="deepClone">
+        <draggable class="draggable-area" v-model="content" :options="{ group: { name: 'content', put: ['content', 'toolbox'] }, handle: '.drag-handle', ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' }">
           <div class="component" v-for="(component, index) in content" :key="component.index">
             <section class="component" v-html="component.html"></section>
             <div class="blockly-component-toolbar btn-group-vertical" role="group">
               <div class="btn toolbar-handle drag-handle blockly-component-tool">
                 <i class="fas fa-hand-point-up"></i>
               </div>
-              <div class="btn toolbar-html blockly-component-tool" v-b-modal="'component' + '-' + index">
+              <div class="btn toolbar-html blockly-component-tool" @click="htmlCodeEditorModalShow(index)">
                 <i class="fas fa-code"></i>
               </div>
-              <div class="btn toolbar-copy blockly-component-tool" v-on:click="copy(index)">
+              <div class="btn toolbar-copy blockly-component-tool" @click="copy(index)">
                 <i class="fas fa-copy"></i>
               </div>
-              <div class="btn toolbar-remove blockly-component-tool" v-b-modal="'remove-notify' + '-' + index">
+              <div class="btn toolbar-remove blockly-component-tool" @click="removeNotifyModalShow(index)">
                 <i class="fas fa-trash-alt"></i>
               </div>
             </div>
@@ -35,20 +34,20 @@
       </div>
 
       <!-- Modal Component Html Code -->
-      <b-modal :id="'component' + '-' + index" hide-footer size="lg" title="Html Code" v-for="(component, index) in content" :key="component.index">
-        <textarea class="html-code" v-model="component.html"></textarea>
+      <b-modal id="html-code-editor-modal" ref="htmlCodeEditorModallRef" size="lg" title="Html Code" no-fade @ok="htmlCodeEditorSave">
+        <textarea class="html-code" v-model="htmlCodeEditorContent"></textarea>
       </b-modal>
 
       <!-- Modal Component Remove Notify -->
-      <b-modal :id="'remove-notify' + '-' + index" hide-header v-for="(component, index) in content" :key="component.index" @ok="remove(index)"><h4>Are you sure you want to delete this Component?</h4></b-modal>
+      <b-modal id="remove-notify-modal" ref="removeNotifyModalRef" hide-header no-fade @ok="remove"><h4>Are you sure you want to remove?</h4></b-modal>
       
       <!-- Sidebar -->
       <div id="mySidenav" class="sidenav" :class="{ 'sidenav-show': isSidebarShow }">
-        <a class="toolbox-toggle" v-on:click="toggleNav()">
+        <a class="toolbox-toggle" @click="toggleNav()">
           <i class="fas fa-wrench"></i>
         </a>
         <div class="toolbox">
-          <draggable v-model="toolbox" :options="{ group: { name: 'toolbox', pull: 'clone', put: false }, animation: 150, sort: false, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' }" :clone="deepClone">
+          <draggable v-model="toolbox" :options="{ group: { name: 'toolbox', pull: 'clone', put: false }, sort: false, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' }" :clone="deepClone">
             <div class="component" v-for="tool in toolbox" :key="tool.index" :index="tool.index">
               <img :src="tool.thumbnail" class="thumbnail">
             </div>
@@ -61,18 +60,12 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import BootstrapVue from 'bootstrap-vue'
 import Draggable from 'vuedraggable'
 // import Quill from 'quill'
 
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap-vue/dist/bootstrap-vue.min.css'
 // import 'quill/dist/quill.bubble.css'
 
 import myComponents from './components'
-
-Vue.use(BootstrapVue)
 
 export default {
   name: 'blockly-component',
@@ -84,9 +77,11 @@ export default {
       isCard: 'true',
       isEmpty: true,
       isSidebarShow: false,
-      toolbox: JSON.parse(JSON.stringify(myComponents)),
+      toolbox: [],
       toolboxIsOpen: false,
-      content: JSON.parse(JSON.stringify(myComponents))
+      content: [],
+      selected: -1,
+      htmlCodeEditorContent: ''
     }
   },
   watch: {
@@ -96,6 +91,8 @@ export default {
   },
   mounted: function () {
     this.isEmpty = this.content.length === 0
+    this.toolbox = JSON.parse(JSON.stringify(myComponents))
+    // this.content = JSON.parse(JSON.stringify(myComponents))
     // const ColorClass = Quill.import('attributors/class/color')
     // const SizeStyle = Quill.import('attributors/style/size')
 
@@ -109,15 +106,39 @@ export default {
   },
   methods: {
     copy: function (index) {
-      const clone = Object.assign({}, this.content[index])
+      const clone = Object.assign(this.content[index])
 
       this.content.splice(index, 0, clone)
     },
+    htmlCodeEditorModalShow: function (index) {
+      this.selected = index
+      this.htmlCodeEditorContent = this.content[index].html
+      this.$refs.htmlCodeEditorModallRef.show()
+    },
+    htmlCodeEditorSave: function () {
+      this.$refs.htmlCodeEditorModallRef.hide()
+      if (this.selected < 0) {
+        return
+      }
+
+      this.content[this.selected].html = this.htmlCodeEditorContent
+      this.htmlCodeEditorContent = ''
+      this.selected = -1
+    },
     remove: function (index) {
-      this.content.splice(index, 1)
+      this.$refs.removeNotifyModalRef.hide()
+      if (this.selected < 0) {
+        return
+      }
+      this.content.splice(this.selected, 1)
+      this.selected = -1
+    },
+    removeNotifyModalShow: function (index) {
+      this.selected = index
+      this.$refs.removeNotifyModalRef.show()
     },
     deepClone: function (original) {
-      return JSON.parse(JSON.stringify(original))
+      return Object.assign({}, original)
     },
     toggleNav: function () {
       this.isSidebarShow = !this.isSidebarShow
@@ -150,7 +171,7 @@ export default {
   box-sizing: border-box;
   border: 1px solid #ebeef5;
   background-color: #fff;
-  overflow: hidden;
+  /* overflow: hidden; */
   color: #303133;
   max-width: 100%;
   min-height: 371.25mm;
@@ -167,33 +188,34 @@ export default {
   box-sizing: border-box;
   /* border: 1px solid #ebeef5; */
   background-color: #fff;
-  overflow: hidden;
+  /* overflow: hidden; */
   color: #303133;
   max-width: 100%;
   min-height: 371.25mm;
   left: 50%;
   transform: translateX(-50%);
 }
+/* @media screen and (max-width: 767.98px) {
+  .card {
+    padding: 10px;
+  }
+
+  .not-card {
+    padding: 10px;
+  }
+} */
 .draggable-area:empty {
-  min-height: 120px;
+  min-height: 360px;
   border-radius: 5px;
   border: 5px dashed gray;
   font-size: 2.5rem;
   font-weight: 500;
   text-align: center;
-  line-height: 120px;
+  line-height: 360px;
 }
 .draggable-area:empty:before {
   content: 'Drop Here';
 }
-/* .drop-here {
-  height: 120px;
-  width: 100em;
-  border-radius: 5px;
-  border: 5px dashed gray;
-  text-align: center;
-  position: absolute;
-} */
 .component {
   position: relative;
   margin-bottom: 35px;
@@ -209,13 +231,6 @@ export default {
   border-radius: 5px;
   border: 5px dashed gray;
 }
-/* .drop-here > h1 {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: black;
-} */
 .blockly-component-toolbar {
   position: absolute;
   top: 10px;
@@ -346,7 +361,7 @@ export default {
   margin-right: 10px;
 }
 
-@media screen and (max-height: 450px) {
+@media screen and (max-width: 767.98px) {
   .sidenav {
     padding-top: 15px;
   }

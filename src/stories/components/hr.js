@@ -4,10 +4,7 @@ export default {
   html: `\
 <div class="row justify-content-around">
   <div class="col-sm-12 edit">
-    <br>
-    <hr>
-    <br>
-    <br>
+    <hr style="border: 0; border-top: #000 5px solid; margin-top: 10px; margin-bottom: 15px;">
   </div>
 </div>\
 `
