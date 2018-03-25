@@ -14,8 +14,8 @@
       <div :class="{ card: isCard == 'true', 'not-card': isCard == 'false' }">
         <draggable class="draggable-area" v-model="content" :options="{ group: { name: 'content', put: ['content', 'toolbox'] }, handle: '.drag-handle', ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' }">
           <div class="component" v-for="(component, index) in content" :key="component.index">
-            <section class="component" v-html="component.html"></section>
-            <div class="blockly-component-toolbar btn-group-vertical" role="group">
+            <section class="component row edit" :data-id="index" v-html="component.html"></section>
+            <div v-if="selected == index" class="blockly-component-toolbar btn-group-vertical" role="group">
               <div class="btn toolbar-handle drag-handle blockly-component-tool">
                 <i class="fas fa-hand-point-up"></i>
               </div>
@@ -60,20 +60,28 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import BootstrapVue from 'bootstrap-vue'
 import Draggable from 'vuedraggable'
-// import Quill from 'quill'
+import MediumEditor from 'medium-editor'
 
-// import 'quill/dist/quill.bubble.css'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'medium-editor/dist/css/medium-editor.min.css'
+import 'medium-editor/dist/css/themes/beagle.min.css'
 
 import myComponents from './components'
+
+Vue.use(BootstrapVue)
 
 export default {
   name: 'blockly-component',
   components: {
     Draggable
   },
-  data: function () {
+  data: function() {
     return {
+      editor: {},
       isCard: 'true',
       isEmpty: true,
       isSidebarShow: false,
@@ -85,37 +93,76 @@ export default {
     }
   },
   watch: {
-    content: function (value) {
+    content: function(value) {
       this.isEmpty = value.length === 0
+      this.initEditor()
+    },
+    selected: function(value) {
+      if (value < 0) {
+        console.log('Selected: None')
+        return
+      }
+      console.log('Selected: ' + value)
     }
   },
-  mounted: function () {
+  mounted: function() {
     this.isEmpty = this.content.length === 0
     this.toolbox = JSON.parse(JSON.stringify(myComponents))
-    // this.content = JSON.parse(JSON.stringify(myComponents))
-    // const ColorClass = Quill.import('attributors/class/color')
-    // const SizeStyle = Quill.import('attributors/style/size')
-
-    // Quill.register(ColorClass, true)
-    // Quill.register(SizeStyle, true)
-
-    // const editor = new Quill('#editor', {
-    //   // modules: { toolbar: '#toolbar' },
-    //   theme: 'bubble'
-    // })
+    this.initEditor()
   },
   methods: {
-    copy: function (index) {
+    initEditor: function() {
+      this.$nextTick(() => {
+        const elements = document.querySelectorAll('.edit')
+
+        this.editor = new MediumEditor(elements, {
+          placeholder: false,
+          toolbar: {
+            buttons: [
+              'bold',
+              'italic',
+              'underline',
+              'anchor',
+              'h1',
+              'h2',
+              'h3',
+              'image',
+              'quote',
+              'justifyLeft',
+              'justifyCenter',
+              'justifyRight',
+              'justifyFull',
+              'removeFormat'
+            ]
+          }
+        })
+
+        this.editor.subscribe('focus', (event, element) => {
+          this.selected = element.dataset.id
+        })
+        this.editor.subscribe('blur', (event, element) => {
+          // save change
+          this.content[this.selected].html = this.editor.serialize()[
+            'element-' + this.selected
+          ].value
+          this.selected = -1
+        })
+        this.editor.subscribe('editableInput', (event, element) => {
+          console.log(this.editor.serialize()['element-' + this.selected].value)
+        })
+      })
+    },
+    copy: function(index) {
       const clone = Object.assign(this.content[index])
 
       this.content.splice(index, 0, clone)
     },
-    htmlCodeEditorModalShow: function (index) {
+    htmlCodeEditorModalShow: function(index) {
       this.selected = index
       this.htmlCodeEditorContent = this.content[index].html
       this.$refs.htmlCodeEditorModallRef.show()
     },
-    htmlCodeEditorSave: function () {
+    htmlCodeEditorSave: function() {
       this.$refs.htmlCodeEditorModallRef.hide()
       if (this.selected < 0) {
         return
@@ -125,7 +172,7 @@ export default {
       this.htmlCodeEditorContent = ''
       this.selected = -1
     },
-    remove: function (index) {
+    remove: function(index) {
       this.$refs.removeNotifyModalRef.hide()
       if (this.selected < 0) {
         return
@@ -133,24 +180,15 @@ export default {
       this.content.splice(this.selected, 1)
       this.selected = -1
     },
-    removeNotifyModalShow: function (index) {
+    removeNotifyModalShow: function(index) {
       this.selected = index
       this.$refs.removeNotifyModalRef.show()
     },
-    deepClone: function (original) {
+    deepClone: function(original) {
       return Object.assign({}, original)
     },
-    toggleNav: function () {
+    toggleNav: function() {
       this.isSidebarShow = !this.isSidebarShow
-      // const right = document.getElementById("mySidenav").style.right
-      // console.log(right)
-      // if (right == '-250px') {
-      //   this.toolboxIsOpen = false
-      //   document.getElementById("mySidenav").style.width = "0px";
-      // } else {
-      //   this.toolboxIsOpen = true
-      //   document.getElementById("mySidenav").style.width = "-250px";
-      // }
     }
   }
 }
@@ -184,26 +222,14 @@ export default {
   padding: 11.25mm;
   border-radius: 2px;
   background: #fff;
-  /* box-shadow: 0 5px 10px rgba(0, 0, 0, .2); */
   box-sizing: border-box;
-  /* border: 1px solid #ebeef5; */
   background-color: #fff;
-  /* overflow: hidden; */
   color: #303133;
   max-width: 100%;
   min-height: 371.25mm;
   left: 50%;
   transform: translateX(-50%);
 }
-/* @media screen and (max-width: 767.98px) {
-  .card {
-    padding: 10px;
-  }
-
-  .not-card {
-    padding: 10px;
-  }
-} */
 .draggable-area:empty {
   min-height: 360px;
   border-radius: 5px;
@@ -219,6 +245,9 @@ export default {
 .component {
   position: relative;
   margin-bottom: 35px;
+}
+section.component:focus {
+  outline: 1px solid black;
 }
 .hide {
   display: none;
