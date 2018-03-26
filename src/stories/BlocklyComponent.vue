@@ -71,6 +71,7 @@ import 'medium-editor/dist/css/medium-editor.min.css'
 import 'medium-editor/dist/css/themes/beagle.min.css'
 
 import myComponents from './components'
+import profile from './components/profile'
 
 Vue.use(BootstrapVue)
 
@@ -87,7 +88,7 @@ export default {
       isSidebarShow: false,
       toolbox: [],
       toolboxIsOpen: false,
-      content: [],
+      content: [Object.assign({}, profile)],
       selected: -1,
       htmlCodeEditorContent: ''
     }
@@ -95,7 +96,7 @@ export default {
   watch: {
     content: function(value) {
       this.isEmpty = value.length === 0
-      this.initEditor()
+      this.resetEditor()
     },
     selected: function(value) {
       if (value < 0) {
@@ -112,54 +113,63 @@ export default {
   },
   methods: {
     initEditor: function() {
+      if (typeof this.editor !== 'undefined' && this.editor !== null) {
+        return
+      }
+
+      const elements = document.querySelectorAll('.edit')
+
+      this.editor = new MediumEditor(elements, {
+        placeholder: false,
+        toolbar: {
+          buttons: [
+            'bold',
+            'italic',
+            'underline',
+            'anchor',
+            'h1',
+            'h2',
+            'h3',
+            'image',
+            'quote',
+            'justifyLeft',
+            'justifyCenter',
+            'justifyRight',
+            'justifyFull',
+            'removeFormat'
+          ]
+        }
+      })
+
+      this.editor.subscribe('focus', (event, element) => {
+        this.selected = element.dataset.id
+        this.toggleNav(false)
+      })
+
+      this.editor.subscribe('blur', (event, element) => {
+        // save change
+        this.content[this.selected].html = this.editor.serialize()[
+          'element-' + this.selected
+        ].value
+        this.selected = -1
+      })
+
+      this.editor.subscribe('editableInput', (event, element) => {
+        // this.editor.serialize()['element-' + this.selected].value
+      })
+    },
+    resetEditor: function () {
       this.$nextTick(() => {
         const elements = document.querySelectorAll('.edit')
 
-        if (this.editor) {
-          this.editor.addElements(elements)
-          return
-        }
-        this.editor = new MediumEditor(elements, {
-          placeholder: false,
-          toolbar: {
-            buttons: [
-              'bold',
-              'italic',
-              'underline',
-              'anchor',
-              'h1',
-              'h2',
-              'h3',
-              'image',
-              'quote',
-              'justifyLeft',
-              'justifyCenter',
-              'justifyRight',
-              'justifyFull',
-              'removeFormat'
-            ]
-          }
-        })
-
-        this.editor.subscribe('focus', (event, element) => {
-          this.selected = element.dataset.id
-        })
-        this.editor.subscribe('blur', (event, element) => {
-          // save change
-          this.content[this.selected].html = this.editor.serialize()[
-            'element-' + this.selected
-          ].value
-          this.selected = -1
-        })
-        this.editor.subscribe('editableInput', (event, element) => {
-          console.log(this.editor.serialize()['element-' + this.selected].value)
-        })
+        this.editor.addElements(elements)
       })
     },
     copy: function(index) {
-      const clone = Object.assign(this.content[index])
+      const clone = Object.assign({}, this.content[index])
 
       this.content.splice(index, 0, clone)
+      this.selected = index
     },
     htmlCodeEditorModalShow: function(index) {
       this.selected = index
@@ -191,7 +201,11 @@ export default {
     deepClone: function(original) {
       return Object.assign({}, original)
     },
-    toggleNav: function() {
+    toggleNav: function(force) {
+      if (typeof force !== 'undefined' && force !== null) {
+        this.isSidebarShow = force
+        return
+      }
       this.isSidebarShow = !this.isSidebarShow
     }
   }
