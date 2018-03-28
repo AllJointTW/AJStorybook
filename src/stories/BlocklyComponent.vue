@@ -13,8 +13,8 @@
     <div class="blockly-component">
       <div :class="{ card: isCard == 'true', 'not-card': isCard == 'false' }">
         <draggable class="draggable-area" v-model="content" :options="{ group: { name: 'content', put: ['content', 'toolbox'] }, handle: '.drag-handle', ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' }">
-          <div class="component" v-for="(component, index) in content" :key="component.index">
-            <section class="component row edit" :class="{ selected: selected == index }" :data-id="index" v-html="component.html"></section>
+          <section class="component" v-for="(component, index) in content" :key="component.index">
+            <div class="component row edit" :class="{ selected: selected == index }" :data-id="index" v-html="component.html"></div>
             <div v-if="selected == index" class="blockly-component-toolbar btn-group-vertical" role="group">
               <div class="btn toolbar-handle drag-handle blockly-component-tool">
                 <i class="fas fa-hand-point-up"></i>
@@ -29,7 +29,7 @@
                 <i class="fas fa-trash-alt"></i>
               </div>
             </div>
-          </div>
+          </section>
         </draggable>
       </div>
 
@@ -156,6 +156,7 @@ export default {
 
       this.editor.subscribe('editableInput', (event, element) => {
         // this.editor.serialize()['element-' + this.selected].value
+        // console.log(this.editor.serialize())
       })
     },
     resetEditor: function () {
@@ -264,7 +265,7 @@ export default {
   position: relative;
   margin-bottom: 35px;
 }
-section.component.selected:before {
+.component.selected:before {
   content: '';
   position: absolute;
   top: -15px;
@@ -274,7 +275,7 @@ section.component.selected:before {
   border: 1px solid black;
   border-radius: 3px;
 }
-section.component:focus {
+.component:focus {
   outline: none;
 }
 .hide {
