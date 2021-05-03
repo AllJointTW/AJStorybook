@@ -37,7 +37,7 @@
     "vue-template-compiler": "^2.5.15"
   },
   "dependencies": {
-    "bootstrap-vue": "^2.0.0-rc.2",
+    "bootstrap-vue": "^2.0.0-rc.12",
     "medium-editor": "^5.23.3",
     "vue": "^2.5.15",
     "vuedraggable": "^2.16.0"
